@@ -1,0 +1,23 @@
+# :::::::::::::::::::::::::::::::::::
+# :::  V I S U A L I Z A T I O N  :::
+# :::::::::::::::::::::::::::::::::::
+
+
+# This macrofile is executed by typing in the terminal:
+#               % ./run.sh --vis
+
+/run/initialize 
+/vis/open                                             OGL 600x600-0+0
+/vis/viewer/zoom                                      2
+/vis/viewer/set/viewpointThetaPhi                     155 0  # 20 40
+#/vis/viewer/set/viewpointVector                       1 0 0
+/vis/viewer/set/autoRefresh                           true
+/vis/drawVolume                                       worlds
+/tracking/storeTrajectory                             4
+/vis/scene/add/trajectories                           smooth
+/vis/modeling/trajectories/create/drawByCharge
+/vis/scene/endOfEventAction                           accumulate
+/vis/viewer/update
+/vis/scene/add/axes                                   0 0 0 1 cm
+/vis/scene/add/eventID
+

@@ -1,0 +1,102 @@
+# ::::::::::::::::::::::::::::::::::
+# :::::::::::::::::::::::::::::
+# :::                       :::
+# :::   MC-ADD macrofile    :::
+# :::                       :::
+# :::::::::::::::::::::::::::::
+
+
+#/run/numberOfThreads 16   # If you enabled multithreaded mode
+
+/run/initialize 
+/control/verbose   0
+/run/verbose       0
+/tracking/verbose  0
+
+
+# ::::::::::::::::::::::::::::::::::::::::::::
+# :::         Command-Based Scoring        :::
+# ::::::::::::::::::::::::::::::::::::::::::::
+
+/score/create/boxMesh             DetScoringVolume   # Name of the scoring mesh
+/score/mesh/boxSize               7.50 7.50 7.50 mm
+/score/mesh/nBin                  1500 1500 1500
+/score/mesh/translate/xyz         0 0 17.5 mm
+
+/score/quantity/energyDeposit      EnergyDep MeV      # Quantity to score
+/score/filter/particle gammaFilter gamma              # Particle Filter
+/score/close                                          # Closing the mesh
+
+
+# ::::::::::::::::::::::::::::::::::::::::::::
+# :::         Enable Radioactive Decay     :::
+# ::::::::::::::::::::::::::::::::::::::::::::
+
+# This command line is needed so that Geant4 enables the radioactive decay of long-lived ions
+/process/had/rdm/thresholdForVeryLongDecayTime 1.0e+60 y
+
+
+# ::::::::::::::::::::::::::::::::::::::::::::
+# :::         Sources properties           :::
+# :::                 &                    :::
+# :::   Source position and structure      :::
+# ::::::::::::::::::::::::::::::::::::::::::::
+
+# Commands used in this macrofile:
+#/gps/particle       name        || We define the particle type. In this case, it will be gamma
+#/gps/ion            Z A Q E     || We define the gamma based on it Z and A. Q: charge. E: energy
+#/gps/energy         E keV       || We set the particle energy
+#/gps/pos/type       dist        || We set the type of distribution
+#/gps/ang/type       AgDis       || We define the angular distribution. Isotropic emission (iso) is selected by default
+#/gps/pos/shape      Cylinder    || We define the shape of the source
+#/gps/pos/radius     X mm        || We define the radius of the source
+#/gps/pos/halfz      X mm        || We define the half-lenght of the source
+#/gps/pos/centre     X X X mm    || We define the position of the source
+#/gps/pos/confine    source      || We confine the source in the physical volume
+#/gps/pos/rot1                   || We define a rotation. Default [1, 0, 0]
+#/gps/pos/rot2                   || We define a second rotation. Default [0, 1, 0] 
+
+# ::: Cs-137 :::
+/gps/particle             ion
+/gps/ion                  55 137 0 0
+/gps/ang/type             iso
+/gps/pos/type             Volume
+/gps/pos/shape            Para
+/gps/pos/halfx            1.00 mm
+/gps/pos/halfy            1.00 mm
+/gps/pos/halfz            1.00 mm
+/gps/pos/rot1             1 0 0
+/gps/pos/rot2             0 0 1 
+/gps/energy               0 keV
+/gps/pos/centre           0 0 0 mm
+
+
+# :::::::::::::::::::::::::::::::::::::::::::
+# :::            Run Beam On              :::
+# :::::::::::::::::::::::::::::::::::::::::::
+
+/run/beamOn               100000000
+
+
+# ::::::::::::::::::::::::::::::::::::::::::
+# ::: Command-Based Scorer Visualization :::
+# ::::::::::::::::::::::::::::::::::::::::::
+
+# Uncomment the following lines ONLY IF you want to verify the scorer geometry using interactive mode
+# Terminal% ./run.sh --vis
+# Session: /control/execute MC-ADD.mac
+
+#/vis/drawVolume worlds
+#/vis/viewer/copyViewFrom viewer-0
+#/score/colorMap/setMinMax ! 0. 800.
+#/control/loop drawSlice.mac iColumn 0 0 1 # Second number is the number of slices depending on the no of bins defined previously
+
+
+# :::::::::::::::::::::::::::::::::::::::::::
+# :::            Scoring Files            :::
+# :::::::::::::::::::::::::::::::::::::::::::
+
+# To save more scored quantities use: /score/dumpQuantityToFile ScoringMeshName QuantityToScore FileName.csv 
+
+/score/dumpQuantityToFile DetScoringVolume EnergyDep GammaEnergyDep.csv 
+
