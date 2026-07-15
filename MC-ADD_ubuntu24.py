@@ -648,15 +648,15 @@ void DetectorConstruction::ConstructSDandField()
 # :::         Command-Based Scoring        :::
 # ::::::::::::::::::::::::::::::::::::::::::::
 
-/score/create/cylinderMesh        DetScoringVolume
+/score/create/cylinderMesh        DetScoringVolume   # Name of the scoring mesh
 /score/mesh/cylinderSize          {detector_dim_values[1]} {DetLen:.2f} mm
 /score/mesh/nBin                  {iR:.0f} {iZ:.0f} {iPhi:.0f}               # R Z Phi
 /score/mesh/translate/xyz         {detector_pos_values[0]} {detector_pos_values[1]} {detector_pos_values[2]} mm
 /score/mesh/rotate/rotateX        90 deg
 
-/score/quantity/energyDeposit      EnergyDep MeV
-/score/filter/particle gammaFilter gamma
-/score/close """
+/score/quantity/energyDeposit      EnergyDep MeV      # Quantity to score
+/score/filter/particle gammaFilter gamma              # Particle Filter
+/score/close                                          # Closing the mesh """ 
 
         CommandBasedScoringVisualization =f"""# ::::::::::::::::::::::::::::::::::::::::::
 # ::: Command-Based Scorer Visualization :::
@@ -674,6 +674,8 @@ void DetectorConstruction::ConstructSDandField()
 # :::::::::::::::::::::::::::::::::::::::::::
 # :::            Scoring Files            :::
 # :::::::::::::::::::::::::::::::::::::::::::
+
+# To save more scored quantities use: /score/dumpQuantityToFile ScoringMeshName QuantityToScore FileName.csv 
 
 /score/dumpQuantityToFile DetScoringVolume EnergyDep CylinderGammaEnergyDep.csv 
 """
