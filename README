@@ -122,8 +122,32 @@ MC-ADD has three main components:
 
         These same steps are also described in the DetectorConstruction file.
 
+    3) Mesh geometry as a sensitive detector:
+        If the detector geometry is not one of the conventional predefined shapes available in Geant4, the user can add the detector geometry as a mesh-based body. To avoid errors during the automatic generation of DetectorConstruction.cc through the GUI, the user should temporarily define the detector as either a box or a cylinder. This placeholder geometry is used solely to generate the DetectorConstruction.cc file.
+        
+        The GammaSpectroscopy setup will be used as an example. In this setup, the NaI crystal was imported as a mesh file, while the GUI defined the detector using an arbitrary geometry consisting of a 1 × 1 × 1 mm box.
 
-    3) Modifying the macro file: The macro file can be modified to customize the command-based scoring parameters and the type of radiation to be simulated. 
+        In DetectorConstruction.cc, the Detector section was disabled by enclosing it within /* ... */. Refer to GammaSpectroscopy.txt, located in the DetectorConstructionGeometries folder (lines 181–189).
+        
+        Next, enable the Mesh Geometries section by uncommenting it, following the procedure described in Step 2.
+
+        In the mesh geometry corresponding to the detector active volume, replace the detector MESH NAME with the following. (The following lines apply to the GammaSpectroscopy setup.)
+
+            // ::: NaI :::
+               auto NaI     = meshX->GetSolid();                                                                 ----> Replace the NaI for DetectorStl
+               auto NaI_log = new G4LogicalVolume(NAME, MATERIAL, "NAME_log",0,0,0);                             ----> Replace the NaI_log for Detector_log 
+                              new G4PVPlacement(rotation, Pos1, "NAME", NAME_log, World_log, false, 0, false);   ----> Add Detector_phys = right before new G4PVPlacement
+
+        When visualizing the geometry (described later in Step 6), if the orientation of the geometry is incorrect, adjust the orientation of each volume by modifying its corresponding Rotation parameters.            
+
+            Rotation = new G4RotationMatrix();   // Rotate your geoemtry accordingly
+            Rotation->rotateX(90.*deg);
+            Rotation->rotateY(0.*deg);
+            Rotation->rotateZ(0.*deg);
+
+        In the GammaSpectroscopy setup, only the energy spectrum was of interest. Therefore, the scoring mesh in the macro file was disabled by commenting it out using #. This reduces the memory required by the simulation. If the scoring mesh is needed, define its geometry appropriately before enabling it.
+
+    4) Modifying the macro file: The macro file can be modified to customize the command-based scoring parameters and the type of radiation to be simulated. 
         a) To modify the voxelization, edit the values on lines 22 and 23 of the macro file.
             IMPORTANT: Do not modify the scoring mesh position defined on line 24 unless necessary. If this position is changed, the scoring mesh will no longer be aligned with the detector volume defined in DetectorConstruction.cc.
         b) To score additional quantities (e.g., dose, flux, etc.) or apply particle filters, first define the quantity to be scored, then define the corresponding particle filter, and finally close the scoring mesh using the /score/close command.
@@ -137,7 +161,7 @@ MC-ADD has three main components:
  https://geant4-userdoc.web.cern.ch/UsersGuides/ForApplicationDeveloper/html/GettingStarted/generalParticleSource.html
 
 
-    4) Compilation: Before running the simulation, the source code must be compiled. Execute the following commands in the terminal:
+    5) Compilation: Before running the simulation, the source code must be compiled. Execute the following commands in the terminal:
                         > UserTerminal% make clean
                         > UserTerminal% make -jX      where 'X' is the number of CPU cores available on your computer.
 
@@ -153,7 +177,7 @@ MC-ADD has three main components:
                     IMPORTANT: It is strongly recommended to visualize the geometry before running the simulation to verify that it has been modeled correctly.
     
 
-     5) Visualization: The geometry can be visualized using the OGL viewer, which should be available after installing Geant4.
+     6) Visualization: The geometry can be visualized using the OGL viewer, which should be available after installing Geant4.
                         - Run the following command in the terminal to launch the visualization:
                                 > UserTerminal% ./run.sh --vis
 
